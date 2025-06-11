@@ -16,12 +16,19 @@
             align-items: center;
             cursor: pointer;
         }
+        button { margin: 10px; padding: 10px 20px; font-size: 16px; }
     </style>
 </head>
 <body>
 
 <h1>Tic Tac Toe</h1>
-<div class="board" id="board"></div>
+
+<div id="modeSelection">
+    <button onclick="startGame('friend')">Play with Friend</button>
+    <button onclick="startGame('computer')">Play with Computer</button>
+</div>
+
+<div class="board" id="board" style="display:none;"></div>
 <p id="message"></p>
 
 <script>
@@ -29,48 +36,86 @@
     const message = document.getElementById("message");
     let currentPlayer = "X";
     let cells = [];
+    let gameMode = ""; // 'friend' or 'computer'
 
-    function checkWinner() {
-        const wins = [
-            [0,1,2], [3,4,5], [6,7,8], // rows
-            [0,3,6], [1,4,7], [2,5,8], // columns
-            [0,4,8], [2,4,6]           // diagonals
-        ];
-
-        for (let win of wins) {
-            const [a, b, c] = win;
-            if (cells[a].innerText && cells[a].innerText === cells[b].innerText && cells[a].innerText === cells[c].innerText) {
-                message.innerText = `Player ${currentPlayer} wins!`;
-                board.style.pointerEvents = "none";
-                return;
-            }
-        }
-
-        if ([...cells].every(cell => cell.innerText)) {
-            message.innerText = "It's a draw!";
-            return;
-        }
+    function startGame(mode) {
+        gameMode = mode;
+        document.getElementById("modeSelection").style.display = "none";
+        board.style.display = "grid";
+        initBoard();
     }
 
-    function cellClick(e) {
-        if (e.target.innerText === "") {
-            e.target.innerText = currentPlayer;
-            checkWinner();
-            currentPlayer = currentPlayer === "X" ? "O" : "X";
-        }
-    }
+    function initBoard() {
+        board.innerHTML = "";
+        cells = [];
+        currentPlayer = "X";
+        message.innerText = "";
+        board.style.pointerEvents = "auto";
 
-    function init() {
         for (let i = 0; i < 9; i++) {
             let cell = document.createElement("div");
             cell.className = "cell";
-            cell.addEventListener("click", cellClick);
+            cell.addEventListener("click", () => cellClick(cell));
             board.appendChild(cell);
             cells.push(cell);
         }
     }
 
-    init();
+    function cellClick(cell) {
+        if (cell.innerText === "" && board.style.pointerEvents !== "none") {
+            cell.innerText = currentPlayer;
+            if (checkWinner()) {
+                message.innerText = `Player ${currentPlayer} wins!`;
+                board.style.pointerEvents = "none";
+                return;
+            }
+            if (isDraw()) {
+                message.innerText = "It's a draw!";
+                return;
+            }
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+
+            if (gameMode === "computer" && currentPlayer === "O") {
+                setTimeout(computerMove, 500);
+            }
+        }
+    }
+
+    function computerMove() {
+        let emptyCells = cells.filter(cell => cell.innerText === "");
+        if (emptyCells.length === 0) return;
+        let randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        randomCell.innerText = "O";
+        if (checkWinner()) {
+            message.innerText = "Computer wins!";
+            board.style.pointerEvents = "none";
+            return;
+        }
+        if (isDraw()) {
+            message.innerText = "It's a draw!";
+            return;
+        }
+        currentPlayer = "X";
+    }
+
+    function checkWinner() {
+        const wins = [
+            [0,1,2], [3,4,5], [6,7,8],
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]
+        ];
+
+        return wins.some(win => {
+            const [a, b, c] = win;
+            return cells[a].innerText !== "" &&
+                   cells[a].innerText === cells[b].innerText &&
+                   cells[a].innerText === cells[c].innerText;
+        });
+    }
+
+    function isDraw() {
+        return [...cells].every(cell => cell.innerText !== "");
+    }
 </script>
 
 </body>
