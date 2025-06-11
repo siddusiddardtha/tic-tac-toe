@@ -2,50 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tic Tac Toe Pro</title>
+    <title>Tic Tac Toe Ultimate Edition</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-align: center;
-            background: linear-gradient(135deg, #89f7fe, #66a6ff);
             margin: 0;
             padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1d2b64, #f8cdda);
             color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.5s;
         }
-
-        h1 {
-            margin-top: 30px;
-            font-size: 48px;
-            text-shadow: 2px 2px 4px #000;
+        .container {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
         }
-
-        .mode-buttons button, #restartBtn {
-            margin: 10px;
+        h1 { margin-bottom: 20px; font-size: 48px; }
+        .mode-buttons button, #restartBtn, #darkBtn {
             padding: 15px 30px;
+            margin: 10px;
             font-size: 20px;
             border: none;
             border-radius: 10px;
             cursor: pointer;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
             transition: 0.3s;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
         }
-
-        .mode-buttons button:hover, #restartBtn:hover {
+        .mode-buttons button:hover, #restartBtn:hover, #darkBtn:hover {
             transform: scale(1.05);
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(255,255,255,0.2);
         }
-
         .board {
             display: grid;
             grid-template-columns: repeat(3, 100px);
-            grid-gap: 15px;
+            gap: 15px;
             margin: 30px auto;
+            justify-content: center;
         }
-
         .cell {
             width: 100px;
             height: 100px;
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(255,255,255,0.2);
             border-radius: 15px;
             font-size: 60px;
             display: flex;
@@ -55,59 +58,53 @@
             transition: 0.3s;
             box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
         }
-
-        .cell:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-
-        #message {
-            font-size: 26px;
-            margin: 20px 0;
-            text-shadow: 1px 1px 3px #000;
-        }
-
-        #scoreboard {
-            font-size: 22px;
-            margin-bottom: 20px;
-        }
-
+        .cell:hover { background-color: rgba(255,255,255,0.4); }
+        #message { font-size: 26px; margin: 20px 0; }
+        #scoreboard { font-size: 20px; margin-bottom: 20px; }
         @media (max-width: 500px) {
-            .board { grid-template-columns: repeat(3, 80px); grid-gap: 10px; }
+            .board { grid-template-columns: repeat(3, 80px); gap: 10px; }
             .cell { width: 80px; height: 80px; font-size: 40px; }
             h1 { font-size: 36px; }
-            .mode-buttons button, #restartBtn { font-size: 18px; padding: 10px 20px; }
+            .mode-buttons button, #restartBtn, #darkBtn { font-size: 16px; padding: 10px 20px; }
         }
     </style>
 </head>
 <body>
 
-<h1>Tic Tac Toe Pro</h1>
+<div class="container">
+    <h1>Tic Tac Toe Ultimate</h1>
 
-<div class="mode-buttons" id="modeSelection">
-    <button onclick="startGame('friend')">Play with Friend</button>
-    <button onclick="startGame('computer')">Play with Computer</button>
+    <div class="mode-buttons" id="modeSelection">
+        <button onclick="startGame('friend')">Play with Friend</button>
+        <button onclick="startGame('computer')">Play with Computer</button>
+    </div>
+
+    <div class="board" id="board" style="display:none;"></div>
+    <div id="message"></div>
+
+    <div id="scoreboard" style="display:none;">
+        <p>Player X Wins: <span id="xScore">0</span> | Player O Wins: <span id="oScore">0</span></p>
+    </div>
+
+    <button id="restartBtn" style="display:none;" onclick="restartGame()">Restart</button>
+    <button id="darkBtn" style="display:none;" onclick="toggleDark()">Toggle Dark Mode</button>
 </div>
 
-<div class="board" id="board" style="display:none;"></div>
-
-<div id="message"></div>
-
-<div id="scoreboard" style="display:none;">
-    <p>Player X Wins: <span id="xScore">0</span> | Player O Wins: <span id="oScore">0</span></p>
-</div>
-
-<button id="restartBtn" style="display:none;" onclick="restartGame()">Restart</button>
+<audio id="clickSound" src="https://www.soundjay.com/button/sounds/button-16.mp3"></audio>
+<audio id="winSound" src="https://www.soundjay.com/button/sounds/button-09.mp3"></audio>
+<audio id="drawSound" src="https://www.soundjay.com/button/sounds/button-4.mp3"></audio>
 
 <script>
     const board = document.getElementById("board");
     const message = document.getElementById("message");
     const restartBtn = document.getElementById("restartBtn");
     const scoreboard = document.getElementById("scoreboard");
-    let xScore = 0;
-    let oScore = 0;
-    let currentPlayer = "X";
-    let cells = [];
-    let gameMode = "";
+    const darkBtn = document.getElementById("darkBtn");
+    const clickSound = document.getElementById("clickSound");
+    const winSound = document.getElementById("winSound");
+    const drawSound = document.getElementById("drawSound");
+
+    let xScore = 0, oScore = 0, currentPlayer = "X", cells = [], gameMode = "";
 
     function startGame(mode) {
         gameMode = mode;
@@ -115,14 +112,13 @@
         board.style.display = "grid";
         scoreboard.style.display = "block";
         restartBtn.style.display = "inline-block";
+        darkBtn.style.display = "inline-block";
         initBoard();
     }
 
     function initBoard() {
         board.innerHTML = "";
-        cells = [];
-        currentPlayer = "X";
-        message.innerText = "";
+        cells = []; currentPlayer = "X"; message.innerText = "";
         board.style.pointerEvents = "auto";
 
         for (let i = 0; i < 9; i++) {
@@ -136,37 +132,22 @@
 
     function cellClick(cell) {
         if (cell.innerText === "" && board.style.pointerEvents !== "none") {
+            clickSound.play();
             cell.innerText = currentPlayer;
-            if (checkWinner()) {
-                handleWin(currentPlayer);
-                return;
-            }
-            if (isDraw()) {
-                message.innerText = "It's a draw!";
-                board.style.pointerEvents = "none";
-                return;
-            }
+            if (checkWinner()) return handleWin(currentPlayer);
+            if (isDraw()) return handleDraw();
             currentPlayer = currentPlayer === "X" ? "O" : "X";
-
-            if (gameMode === "computer" && currentPlayer === "O") {
-                setTimeout(computerMove, 400);
-            }
+            if (gameMode === "computer" && currentPlayer === "O") setTimeout(computerMove, 400);
         }
     }
 
     function computerMove() {
         let move = findBestMove("O") || findBestMove("X") || randomMove();
         if (move !== null) {
+            clickSound.play();
             cells[move].innerText = "O";
-            if (checkWinner()) {
-                handleWin("O");
-                return;
-            }
-            if (isDraw()) {
-                message.innerText = "It's a draw!";
-                board.style.pointerEvents = "none";
-                return;
-            }
+            if (checkWinner()) return handleWin("O");
+            if (isDraw()) return handleDraw();
             currentPlayer = "X";
         }
     }
@@ -175,10 +156,7 @@
         for (let i = 0; i < cells.length; i++) {
             if (cells[i].innerText === "") {
                 cells[i].innerText = player;
-                if (checkWinner()) {
-                    cells[i].innerText = "";
-                    return i;
-                }
+                if (checkWinner()) { cells[i].innerText = ""; return i; }
                 cells[i].innerText = "";
             }
         }
@@ -186,30 +164,24 @@
     }
 
     function randomMove() {
-        let emptyCells = cells.map((cell, idx) => cell.innerText === "" ? idx : null).filter(idx => idx !== null);
-        return emptyCells.length > 0 ? emptyCells[Math.floor(Math.random() * emptyCells.length)] : null;
+        let emptyCells = cells.map((c, i) => c.innerText === "" ? i : null).filter(i => i !== null);
+        return emptyCells.length ? emptyCells[Math.floor(Math.random() * emptyCells.length)] : null;
     }
 
     function checkWinner() {
-        const wins = [
-            [0,1,2], [3,4,5], [6,7,8],
-            [0,3,6], [1,4,7], [2,5,8],
-            [0,4,8], [2,4,6]
-        ];
-
-        return wins.some(win => {
-            const [a, b, c] = win;
-            return cells[a].innerText !== "" &&
-                   cells[a].innerText === cells[b].innerText &&
-                   cells[a].innerText === cells[c].innerText;
+        const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+        return wins.some(([a,b,c]) => {
+            if (cells[a].innerText !== "" && cells[a].innerText === cells[b].innerText && cells[a].innerText === cells[c].innerText) return true;
+            return false;
         });
     }
 
     function isDraw() {
-        return [...cells].every(cell => cell.innerText !== "");
+        return cells.every(cell => cell.innerText !== "");
     }
 
     function handleWin(player) {
+        winSound.play();
         message.innerText = `🎉 Player ${player} Wins!`;
         board.style.pointerEvents = "none";
         if (player === "X") {
@@ -221,8 +193,21 @@
         }
     }
 
-    function restartGame() {
-        initBoard();
+    function handleDraw() {
+        drawSound.play();
+        message.innerText = "🤝 It's a Draw!";
+        board.style.pointerEvents = "none";
+    }
+
+    function restartGame() { initBoard(); }
+
+    function toggleDark() {
+        document.body.classList.toggle("dark");
+        if (document.body.classList.contains("dark")) {
+            document.body.style.background = "linear-gradient(135deg, #000428, #004e92)";
+        } else {
+            document.body.style.background = "linear-gradient(135deg, #1d2b64, #f8cdda)";
+        }
     }
 </script>
 
