@@ -2,43 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tic Tac Toe</title>
+    <title>Tic Tac Toe Pro</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f0f0; }
-        h1 { color: #333; margin-top: 20px; }
-        .board { display: grid; grid-template-columns: repeat(3, 100px); margin: 20px auto; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #89f7fe, #66a6ff);
+            margin: 0;
+            padding: 0;
+            color: #fff;
+        }
+
+        h1 {
+            margin-top: 30px;
+            font-size: 48px;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .mode-buttons button, #restartBtn {
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+        }
+
+        .mode-buttons button:hover, #restartBtn:hover {
+            transform: scale(1.05);
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 15px;
+            margin: 30px auto;
+        }
+
         .cell {
-            width: 100px; height: 100px; 
-            border: 2px solid #333;
-            font-size: 50px; 
-            display: flex; 
-            justify-content: center; 
+            width: 100px;
+            height: 100px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            font-size: 60px;
+            display: flex;
+            justify-content: center;
             align-items: center;
             cursor: pointer;
-            background-color: #fff;
-            transition: background-color 0.3s;
+            transition: 0.3s;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
         }
-        .cell:hover { background-color: #e6e6e6; }
-        button { margin: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
-        #scoreboard { margin-top: 20px; font-size: 18px; }
-        #message { font-size: 20px; font-weight: bold; margin: 15px 0; }
+
+        .cell:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        #message {
+            font-size: 26px;
+            margin: 20px 0;
+            text-shadow: 1px 1px 3px #000;
+        }
+
+        #scoreboard {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 500px) {
+            .board { grid-template-columns: repeat(3, 80px); grid-gap: 10px; }
+            .cell { width: 80px; height: 80px; font-size: 40px; }
+            h1 { font-size: 36px; }
+            .mode-buttons button, #restartBtn { font-size: 18px; padding: 10px 20px; }
+        }
     </style>
 </head>
 <body>
 
-<h1>Tic Tac Toe</h1>
+<h1>Tic Tac Toe Pro</h1>
 
-<div id="modeSelection">
+<div class="mode-buttons" id="modeSelection">
     <button onclick="startGame('friend')">Play with Friend</button>
     <button onclick="startGame('computer')">Play with Computer</button>
 </div>
 
 <div class="board" id="board" style="display:none;"></div>
-<p id="message"></p>
+
+<div id="message"></div>
 
 <div id="scoreboard" style="display:none;">
-    <p>Player X Wins: <span id="xScore">0</span></p>
-    <p>Player O Wins: <span id="oScore">0</span></p>
+    <p>Player X Wins: <span id="xScore">0</span> | Player O Wins: <span id="oScore">0</span></p>
 </div>
 
 <button id="restartBtn" style="display:none;" onclick="restartGame()">Restart</button>
@@ -94,13 +149,12 @@
             currentPlayer = currentPlayer === "X" ? "O" : "X";
 
             if (gameMode === "computer" && currentPlayer === "O") {
-                setTimeout(computerMove, 500);
+                setTimeout(computerMove, 400);
             }
         }
     }
 
     function computerMove() {
-        // Simple AI: first try to win, then block, then random move
         let move = findBestMove("O") || findBestMove("X") || randomMove();
         if (move !== null) {
             cells[move].innerText = "O";
@@ -156,7 +210,7 @@
     }
 
     function handleWin(player) {
-        message.innerText = `Player ${player} wins!`;
+        message.innerText = `🎉 Player ${player} Wins!`;
         board.style.pointerEvents = "none";
         if (player === "X") {
             xScore++;
